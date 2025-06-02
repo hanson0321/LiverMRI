@@ -1,2 +1,18 @@
-# 忽略 data 資料夾
-/data/
+# 忽略 data 資料夾（含所有子資料夾和檔案）
+data/
+
+# 其他常見忽略設定
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# VSCode
+.vscode/
+
+# MacOS 系統檔案
+.DS_Store
+
+# 輸出結果
+output/
