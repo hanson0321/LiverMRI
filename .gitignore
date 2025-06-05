@@ -16,3 +16,4 @@ __pycache__/
 
 # 輸出結果
 output/
+venv/
