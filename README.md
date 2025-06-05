@@ -1,5 +1,6 @@
+## 專案結構
 
-
+```text
 LiverMRI/
 ├── data/All_Patients/             # 病患 DICOM 資料存放處 (示意)
 │   └── PATIENT_ID/
