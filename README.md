@@ -1,8 +1,8 @@
 ## 專案結構
-
+利用 T1 加權影像中較清晰的血管標記，透過 registration 對齊至 PDFF 序列，進一步輔助 liver segmentation 與脂肪含量估算，強化 PDFF segmentation 準確度與臨床應用價值。
 ```text
 
-利用 T1 加權影像中較清晰的血管標記，透過 registration 對齊至 PDFF 序列，進一步輔助 liver segmentation 與脂肪含量估算，強化 PDFF segmentation 準確度與臨床應用價值。
+
 LiverMRI/
 ├── data/All_Patients/             # 病患 DICOM 資料存放處 (示意)
 │   └── PATIENT_ID/
