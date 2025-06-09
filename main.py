@@ -13,10 +13,10 @@ BASE_OUTPUT_PATH = "output"
 T1C_FOLDER_NAME = "Ax T1 FS BH+C"
 PDFF_FOLDER_NAME = "FatFrac  3D Ax IDEAL IQ BH"
 
-# 設定 Frangi 濾波器的參數
+# --- 更新 Frangi 濾波器的參數 ---
+# 請將 vessel_scale 的值設為您在互動模式下找到的最佳值
 FRANGI_PARAMS = {
-    'min_sigma': 3,
-    'max_sigma': 7,
+    'vessel_scale': 1, 
 }
 
 # --- 2. 主程式邏輯 ---
@@ -26,9 +26,9 @@ def main():
     
     print("="*60)
     print("開始執行 MRI 肝臟影像批次處理...")
+    print(f"將使用 Frangi 參數: {FRANGI_PARAMS}")
     print("="*60)
     
-    # 檢查病人資料夾是否存在
     if not os.path.isdir(BASE_DATA_PATH):
         print(f"錯誤：找不到病人資料夾 '{BASE_DATA_PATH}'")
         return
@@ -46,14 +46,15 @@ def main():
             t1c_dir = os.path.join(BASE_DATA_PATH, patient_id, T1C_FOLDER_NAME)
             pdff_dir = os.path.join(BASE_DATA_PATH, patient_id, PDFF_FOLDER_NAME)
             
-            volume_t1c_sitk, array_t1c, _ = load_dicom_series(t1c_dir, f"T1+C ({patient_id})")
+            volume_t1c_sitk, _, _ = load_dicom_series(t1c_dir, f"T1+C ({patient_id})")
             volume_pdff_sitk, array_pdff, original_pdff_paths = load_dicom_series(pdff_dir, f"PDFF ({patient_id})")
 
-            if array_t1c is None or array_pdff is None:
+            if volume_t1c_sitk is None or volume_pdff_sitk is None:
                 raise ValueError("影像載入失敗")
 
-            # --- 影像對位 ---
-            array_t1c_resampled = register_images(volume_pdff_sitk, volume_t1c_sitk)
+            # --- 影像對位 (修正函式呼叫) ---
+            # register_images 現在返回兩個值，我們只需要第一個（影像陣列）
+            array_t1c_resampled, _ = register_images(volume_pdff_sitk, volume_t1c_sitk)
 
             if array_t1c_resampled is None:
                 raise ValueError("影像對位失敗")

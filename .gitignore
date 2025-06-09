@@ -19,3 +19,4 @@ output/
 venv/LiverMRI-bak.git/
 LiverMRI-bak.git/
 venv/
+myenv/ 
