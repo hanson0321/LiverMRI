@@ -1,25 +1,61 @@
-## 專案結構
-利用 T1 加權影像中較清晰的血管標記，透過 registration 對齊至 PDFF 序列，進一步輔助 liver segmentation 與脂肪含量估算，強化 PDFF segmentation 準確度與臨床應用價值。
-流程大致如下：
+# 利用T1影像優化PDFF肝臟血管分析專案
 
-資料載入：從 data/All_Patients/ 中讀取指定病人的 T1 Contrast-Enhanced (Ax T1 FS BH+C) 和 PDFF (FatFrac 3D Ax IDEAL IQ BH) 這兩個 DICOM 影像序列。
-影像對位：以 PDFF 影像為固定參考（Fixed Image），將 T1 影像（Moving Image）對位到 PDFF 的空間座標上。
-血管強化與疊加：對位完成後的 T1 影像會經過 Frangi 濾波器處理以強化血管特徵，然後將強化後的血管圖疊加到 PDFF 影像上。
-儲存結果：最後將這份包含血管標記的疊加影像，儲存成一個新的 DICOM 序列到 output/ 資料夾。
-專案中包含了用於批次處理的 main.py 和一個用於互動式開發與除錯的 interactive_debugger.ipynb
+[![Status](https://img.shields.io/badge/Status-In--Progress-orange)](https://shields.io/)
+
+這是一個醫療影像處理專案，旨在解決 PDFF 序列中肝臟血管對比度不足的問題，以提升後續肝臟分割與脂肪定量分析的準確度。
+
+本專案的核心策略是利用同一次掃描中，對比度更清晰的 T1 加權對比增強影像，透過先進的影像對位技術，將其血管資訊對應到 PDFF 影像空間，為後續分析提供更豐富的解剖結構細節。
+
+## 核心處理流程
+
+本專案的自動化處理管線包含以下四個關鍵步驟：
+
+1.  **資料載入**：自動讀取指定病人的 T1 Contrast-Enhanced 和 PDFF 兩種 DICOM 影像序列。
+2.  **兩階段影像對位**：採用「由粗到精」的策略，先進行快速的**仿射(Affine)對位**校正整體位置，再進行精細的**非剛性B-Spline對位**來擬合局部形變。
+3.  **血管結構偵測**：在對位完成的 T1 影像上，使用 **Frangi 濾波器** 來增強並提取血管結構。
+4.  **影像疊加與儲存**：將提取出的血管遮罩(Vessel Mask)疊加到原始的 PDFF 影像上，並將結果儲存為一個新的 DICOM 序列，以便後續分析與檢視。
+
+## 主要技術棧
+
+* **影像處理**: `SimpleITK`, `scikit-image`, `OpenCV`
+* **數據處理**: `NumPy`, `pydicom`
+* **視覺化與互動**: `matplotlib`, `ipywidgets`
+
+## 專案元件說明
+
 ```text
+MRI_Analysis_Project/
+├── data/                    # 存放原始 DICOM 病人資料
+├── output/                  # 存放處理完成後輸出的疊加影像
+├── utils/                   # 核心演算法模組
+│   ├── data_loader.py       # 專責載入 DICOM 影像序列
+│   └── image_processing.py  # 包含影像對位、血管偵測等核心函式
+├── main.py                  # 專案主程式：用於全自動批次處理所有病人
+├── interactive_debugger.ipynb # Jupyter Notebook：互動式開發與除錯環境
+├── requirements.txt         # Python 環境依賴列表，用於快速部署
+└── README.md                # 專案說明文件 (本檔案)
+```
 
+## 當前進度與成果
 
-LiverMRI/
-├── data/All_Patients/             # 病患 DICOM 資料存放處 (示意)
-│   └── PATIENT_ID/
-│       ├── Ax T1 FS BH+C/         # T1 對比增強 DICOM 影像
-│       └── FatFrac  3D Ax IDEAL IQ BH/ # PDFF DICOM 影像
-├── output/                        # 處理後 DICOM 影像的輸出資料夾
-├── utils/
-│   ├── data_loader.py           # DICOM 序列載入工具
-│   └── image_processing.py      # 影像對位與 Frangi 濾波工具
-├── main.py                        # 批次處理主腳本
-├── interactive_debugger.ipynb     # Jupyter Notebook 互動測試環境
-├── requirements.txt               # Python 套件依賴列表
-└── README.md                      # 本檔案
+* **[已完成]** 成功建立一套從資料載入到結果儲存的**全自動化處理管線** (`main.py`)。
+* **[已完成]** 實現了穩健的**兩階段影像對位演算法**。在成功案例中，量化指標 `NDV` (非微分同胚體積) 為 **0%**，證明了形變的物理真實性與平滑度。
+* **[已完成]** 開發了一套**互動式視覺化除錯工具** (`interactive_debugger.ipynb`)，能快速進行參數調校與結果驗證。
+
+#### 成果預覽
+
+*（建議您在這裡放一張效果最好的病人，對位前後的棋盤格對比圖，以及最終的血管疊加圖）*
+
+![最終血管疊加成果](path/to/your/result_overlay_image.png)
+> 圖：成功案例的最終血管疊加成果，可見血管結構已精準疊加至 PDFF 影像上。
+
+## 當前挑戰與下一步規劃
+
+* **當前挑戰：演算法泛化性**
+    * **現象**：目前的對位演算法採用固定參數，在部分初始位置差異過大或解剖結構特殊的病人案例上，對位效果不佳。
+    * **分析**：這是從「個案成功」邁向「群體穩健」的必經階段，主因是固定參數難以適應所有病人的差異性。
+
+* **下一步規劃**
+    1.  **提升對位穩健性**：將在對位演算法中引入「**多解析度金字塔 (Multi-Resolution Pyramid)**」策略，讓演算法能「由粗到精」地適應不同難度的對位場景。
+    2.  **優化血管偵測**：在目前的 Frangi 濾波後，加入**形態學後處理**步驟（如移除微小雜訊），提升最終血管遮罩的乾淨度與一致性。
+    3.  **建立失敗案例分析流程**：利用互動式工具，針對目前效果不佳的案例進行參數與演算法的迭代優化。
