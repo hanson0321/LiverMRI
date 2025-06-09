@@ -46,7 +46,7 @@ MRI_Analysis_Project/
 
 *（建議您在這裡放一張效果最好的病人，對位前後的棋盤格對比圖，以及最終的血管疊加圖）*
 
-![最終血管疊加成果](/Users/yuheng/Desktop/MRI_Analysis_Project/assets/好血管.jpg)
+![最終血管疊加成果](assets/好血管.jpg)
 > 圖：成功案例的最終血管疊加成果，可見血管結構已精準疊加至 PDFF 影像上。
 
 ## 當前挑戰與下一步規劃
